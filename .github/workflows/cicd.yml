@@ -37,12 +37,12 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd ~/your-app-directory || exit 1
+            cd /home/ubuntu || exit 1
             echo "Pulling latest image"
             sudo docker pull sanjeevashwin/yii2-app:latest
             
             echo "Deploying via docker stack"
-            sudo docker stack deploy -c docker-compose.yml yii2_stack
+            sudo docker stack deploy -c docker-compose.yaml yii2_stack
 
 
       # - name: Deploy to EC2 via SSH
