@@ -37,4 +37,19 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            sudo docker service update --image sanjeevashwin/yii2-app:latest yii2_app
+            cd ~/your-app-directory || exit 1
+            echo "Pulling latest image"
+            sudo docker pull sanjeevashwin/yii2-app:latest
+            
+            echo "Deploying via docker stack"
+            sudo docker stack deploy -c docker-compose.yml yii2_stack
+
+
+      # - name: Deploy to EC2 via SSH
+      #   uses: appleboy/ssh-action@v1.0.0
+      #   with:
+      #     host: ${{ secrets.EC2_HOST }}
+      #     username: ubuntu
+      #     key: ${{ secrets.EC2_SSH_KEY }}
+      #     script: |
+      #       sudo docker service update --image sanjeevashwin/yii2-app:latest yii2_app
