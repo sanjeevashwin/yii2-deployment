@@ -1,0 +1,19 @@
+# setup.yml
+- name: Setup Yii2 environment
+  hosts: web
+  become: true
+  tasks:
+    - name: Install dependencies
+      apt:
+        name: [docker.io, docker-compose, nginx, git]
+        state: present
+        update_cache: yes
+
+    - name: Start Docker
+      service:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Initialize Docker Swarm
+      shell: docker swarm init || true  # ignore if already initialized
