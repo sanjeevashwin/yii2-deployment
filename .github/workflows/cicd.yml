@@ -37,4 +37,4 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            docker service update --image sanjeevashwin/yii2-app:latest yii2_app
+            sudo docker service update --image sanjeevashwin/yii2-app:latest yii2_app
