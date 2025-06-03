@@ -28,7 +28,7 @@ jobs:
           context: .
           file: docker/Dockerfile
           push: true
-          tags: your-dockerhub-username/yii2-app:latest
+          tags: sanjeevashwin/yii2-app:latest
 
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v1.0.0
@@ -37,4 +37,4 @@ jobs:
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            docker service update --image your-dockerhub-username/yii2-app:latest yii2_app
+            docker service update --image sanjeevashwin/yii2-app:latest yii2_app
