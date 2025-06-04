@@ -1,0 +1,33 @@
+- name: Setup Yii2 App Environment
+  hosts: webserver
+  become: yes
+
+  tasks:
+    - name: Install required packages
+      apt:
+        name:
+          - docker.io
+          - docker-compose
+          - nginx
+          - git
+          - php
+          - php-mysql
+        state: present
+        update_cache: yes
+
+    - name: Start and enable Docker
+      systemd:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Start and enable Nginx
+      systemd:
+        name: nginx
+        state: started
+        enabled: true
+
+    - name: Initialize Docker Swarm 
+      shell: docker swarm init || true
+      args:
+        warn: false
