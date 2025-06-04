@@ -31,5 +31,7 @@ EXPOSE 80
 HEALTHCHECK --interval=900s --timeout=10s --start-period=10s --retries=3 \
   CMD curl -f http://localhost/ || exit 1
 
+  
+
 
 
