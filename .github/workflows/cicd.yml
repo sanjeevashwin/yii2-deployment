@@ -60,3 +60,21 @@ jobs:
             echo "Deploying using docker-compose..."
             cd /home/ubuntu
             sudo docker stack deploy -c docker-compose.yaml yii2_stack
+            
+            echo "Creating Nginx config for reverse proxy on port 9000..."
+            sudo bash -c 'cat > /etc/nginx/sites-available/52.66.132.71.conf <<EOF
+            server {
+                listen 9000;
+                server_name 52.66.132.71;
+
+                location / {
+                    proxy_pass http://localhost:8080;
+                    proxy_set_header Host \$host;
+                    proxy_set_header X-Real-IP \$remote_addr;
+                }
+            }
+            EOF'
+
+            echo "Enabling Nginx site and restarting nginx..."
+            sudo ln -sf /etc/nginx/sites-available/52.66.132.71.conf /etc/nginx/sites-enabled/52.66.132.71.conf 
+            sudo nginx -t && sudo systemctl restart nginx
