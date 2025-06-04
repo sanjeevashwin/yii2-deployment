@@ -15,11 +15,34 @@
         state: present
         update_cache: yes
 
-    - name: Change nginx listen port to 9000
-      lineinfile:
-        path: /etc/nginx/sites-available/default
-        regexp: '^(\s*listen\s+)80;'
-        line: '    listen 9000;'
+    - name: Replace nginx default site config to listen on port 9000
+      copy:
+        dest: /etc/nginx/sites-available/default
+        content: |
+          server {
+              listen 9000 default_server;
+              listen [::]:9000 default_server;
+
+              root /var/www/html;
+              index index.html index.htm index.php;
+
+              server_name _;
+
+              location / {
+                  try_files $uri $uri/ =404;
+              }
+
+              location ~ \.php$ {
+                  include snippets/fastcgi-php.conf;
+                  fastcgi_pass unix:/var/run/php/php7.4-fpm.sock;  # adjust if your PHP version differs
+              }
+
+              location ~ /\.ht {
+                  deny all;
+              }
+          }
+      notify:
+        - Reload nginx
 
     - name: Start and enable Docker
       systemd:
@@ -35,3 +58,9 @@
 
     - name: Initialize Docker Swarm
       shell: docker swarm init || true
+
+  handlers:
+    - name: Reload nginx
+      systemd:
+        name: nginx
+        state: reloaded
