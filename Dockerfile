@@ -26,3 +26,8 @@ RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 
 # Apache port
 EXPOSE 80
+
+#healthcheck
+HEALTHCHECK --interval=900s --timeout=10s --start-period=10s --retries=3 \
+  CMD curl -f http://localhost/ || exit 1
+
