@@ -43,8 +43,10 @@ jobs:
 
       - name: Run Ansible Playbook to Set Up EC2
         run: |
-          ansible-playbook -i ansible/inventory.ini ansible/playbook.yaml --private-key ~/.ssh/id_rsa --user ubuntu
-
+         export ANSIBLE_HOST_KEY_CHECKING=False
+         ansible-playbook -i ansible/inventory.ini ansible/playbook.yaml --private-key ~/.ssh/id_rsa -u ubuntu
+      
+      
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v1.0.0
         with:
