@@ -1,4 +1,4 @@
-name: CI/CD Deploy Yii2
+name: CI/CD Deploy Yii2 with Ansible
 
 on:
   push:
@@ -30,6 +30,21 @@ jobs:
           push: true
           tags: sanjeevashwin/yii2-app:latest
 
+      - name: Save SSH Private Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: Install Ansible
+        run: |
+          sudo apt update
+          sudo apt install -y ansible
+
+      - name: Run Ansible Playbook to Set Up EC2
+        run: |
+          ansible-playbook -i ansible/inventory.ini ansible/playbook.yaml --private-key ~/.ssh/id_rsa --user ubuntu
+
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v1.0.0
         with:
@@ -37,19 +52,9 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd /home/ubuntu || exit 1
-            echo "Pulling latest image"
-            sudo docker pull sanjeevashwin/yii2-app:latest
+            echo "Pulling latest image..."
+            docker pull sanjeevashwin/yii2-app:latest
             
-            echo "Deploying via docker stack"
-            sudo docker stack deploy -c docker-compose.yaml yii2_stack
-
-
-      # - name: Deploy to EC2 via SSH
-      #   uses: appleboy/ssh-action@v1.0.0
-      #   with:
-      #     host: ${{ secrets.EC2_HOST }}
-      #     username: ubuntu
-      #     key: ${{ secrets.EC2_SSH_KEY }}
-      #     script: |
-      #       sudo docker service update --image sanjeevashwin/yii2-app:latest yii2_app
+            echo "Deploying using docker-compose..."
+            cd /home/ubuntu
+            docker stack deploy -c docker-compose.yaml yii2_stack
