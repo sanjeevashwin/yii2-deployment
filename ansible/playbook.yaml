@@ -15,6 +15,22 @@
         state: present
         update_cache: yes
 
+    - name: Change nginx listen port to 9000
+      lineinfile:
+        path: /etc/nginx/sites-available/default
+        regexp: '^(\s*listen\s+)80;'
+        line: '    listen 9000;'
+
+    - name: Test nginx configuration
+      command: nginx -t
+      register: nginx_test
+      failed_when: nginx_test.rc != 0
+
+    - name: Reload nginx service
+      systemd:
+        name: nginx
+        state: reloaded
+
     - name: Start and enable Docker
       systemd:
         name: docker
