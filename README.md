@@ -6,18 +6,17 @@ Your Yii2 app is live at:
 
 **Project Structure:**
 
+```bash
 ├── .github/workflows/
 │   └── cicd.yml           # GitHub Actions workflow
-
 ├── ansible/
 │   ├── inventory.ini        # Ansible inventory with EC2 host
 │   └── playbook.yaml        # Ansible playbook for EC2 setup
-
 ├── Dockerfile               # Dockerfile for Yii2 app
 ├── docker-compose.yaml      # Docker Compose config
-
 ├── README.md                # This file
 └── ...
+
 
 **Prerequisites:**
 
