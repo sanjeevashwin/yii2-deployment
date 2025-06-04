@@ -11,6 +11,9 @@ RUN apt-get update && apt-get install -y \
 # Install Composer globally
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
+# Replace default Apache config with our custom one
+COPY apache.conf /etc/apache2/sites-available/000-default.conf
+
 # Copy all files into the container
 COPY . /var/www/html
 
