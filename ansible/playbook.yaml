@@ -3,7 +3,7 @@
   become: yes
 
   tasks:
-    - name: Install required packages
+    - name: Install required packages including nginx
       apt:
         name:
           - docker.io
@@ -27,7 +27,5 @@
         state: started
         enabled: true
 
-    - name: Initialize Docker Swarm 
+    - name: Initialize Docker Swarm
       shell: docker swarm init || true
-      args:
-        warn: false
