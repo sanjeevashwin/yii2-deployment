@@ -55,8 +55,8 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             echo "Pulling latest image..."
-            docker pull sanjeevashwin/yii2-app:latest
+            sudo docker pull sanjeevashwin/yii2-app:latest
             
             echo "Deploying using docker-compose..."
             cd /home/ubuntu
-            docker stack deploy -c docker-compose.yaml yii2_stack
+            sudo docker stack deploy -c docker-compose.yaml yii2_stack
