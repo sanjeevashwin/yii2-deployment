@@ -1,80 +1,32 @@
-name: CI/CD Deploy Yii2 with Ansible
+name: Deploy to Render
 
 on:
   push:
-    branches:
-      - main
+    branches: [dev]   # or your production branch
 
 jobs:
   deploy:
+    name: Build and Deploy to Render
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: Log in to Render Docker registry (optional)
+        run: echo "${{ secrets.RENDER_API_KEY }}" | docker login registry.render.com -u _json_key --password-stdin
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Build and Push Docker Image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: Dockerfile
-          push: true
-          tags: sanjeevashwin/yii2-app:latest
-
-      - name: Save SSH Private Key
+      - name: Build Docker image
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
+          docker build -t registry.render.com/your-service-name:latest .
 
-      - name: Install Ansible
+      - name: Push Docker image
         run: |
-          sudo apt update
-          sudo apt install -y ansible
+          docker push registry.render.com/your-service-name:latest
 
-      - name: Run Ansible Playbook to Set Up EC2
+      - name: Trigger Deploy via Render API
         run: |
-         export ANSIBLE_HOST_KEY_CHECKING=False
-         ansible-playbook -i ansible/inventory.ini ansible/playbook.yaml --private-key ~/.ssh/id_rsa -u ubuntu
-      
-      
-      - name: Deploy to EC2 via SSH
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            echo "Pulling latest image..."
-            sudo docker pull sanjeevashwin/yii2-app:latest
-            
-            echo "Deploying using docker-compose..."
-            cd /home/ubuntu
-            sudo docker stack deploy -c docker-compose.yaml yii2_stack
-            
-            echo "Creating Nginx config for reverse proxy on port 9000..."
-            sudo bash -c 'cat > /etc/nginx/sites-available/52.66.132.71.conf <<EOF
-            server {
-                listen 9000;
-                server_name 52.66.132.71;
-
-                location / {
-                    proxy_pass http://localhost:8080;
-                    proxy_set_header Host \$host;
-                    proxy_set_header X-Real-IP \$remote_addr;
-                }
-            }
-            EOF'
-
-            echo "Enabling Nginx site and restarting nginx..."
-            sudo ln -sf /etc/nginx/sites-available/52.66.132.71.conf /etc/nginx/sites-enabled/52.66.132.71.conf 
-            sudo nginx -t && sudo systemctl restart nginx
+          curl -X POST https://api.render.com/v1/services/SERVICE_ID/deploys \
+            -H "Accept: application/json" \
+            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+            -d '{}'
